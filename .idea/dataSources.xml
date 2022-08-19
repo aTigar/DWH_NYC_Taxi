@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="DWH22-07@fimn-db1.htwk-leipzig.de" uuid="91417cac-efa0-4f06-aa19-c01291fbf584">
+      <driver-ref>sqlserver.jtds</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:jtds:sqlserver://fimn-db1.htwk-leipzig.de:1433/DWH22-07</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="DOMAIN" value="htwk" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>
