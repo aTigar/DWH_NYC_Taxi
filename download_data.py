@@ -9,7 +9,7 @@ years = ['2018', '2019', '2020', '2021', '2022']
 months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
 
 types = ['yellow', 'green', 'fhv', 'fhvhv']
-url_add = 'https://d37ci6vzurychx.cloudfront.net/trip-data/'  # https://s3.amazonaws.com/nyc-tlc/trip+data/
+url_add = 'https://d37ci6vzurychx.cloudfront.net/trip-data/'
 # Set the download directory
 os.chdir('data/')
 # Get list of already downloaded files
