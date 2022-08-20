@@ -24,7 +24,7 @@ for x in types:
         for z in months:
             url_tmp = url_add + x + '_tripdata_' + y + '-' + z + '.parquet'
             file_tmp = x + '_' + z + '_' + y + '.gz'
-            if (file_tmp not in files) and (requests.head(url_tmp).status_code != 404):
+            if (file_tmp not in files) and (requests.head(url_tmp).status_code != 404) and (requests.head(url_tmp).status_code != 403):
                 # Determine number of columns (from data dictionaries)
                 # col_list = list(range(0, 20)) if 'green' in file_tmp else list(range(0, 19))
                 tmp_data = pd.read_parquet(url_tmp)
