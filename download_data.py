@@ -2,9 +2,8 @@ import glob
 import os
 from time import sleep
 
-from loguru import logger
-import pandas as pd
 import requests
+from loguru import logger
 
 
 def requests_data():
