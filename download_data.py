@@ -5,6 +5,7 @@ from time import sleep
 from loguru import logger
 import pandas as pd
 import requests
+import wget
 
 # Years of data to download (currently 2018 - present)
 years = ['2018', '2019', '2020', '2021', '2022']
@@ -13,10 +14,6 @@ months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'
 
 types = ['yellow', 'green', 'fhv', 'fhvhv']
 url_add = 'https://d37ci6vzurychx.cloudfront.net/trip-data/'
-# Set the download directory
-os.chdir('data/')
-# Get list of already downloaded files
-files = glob.glob('yellow*') + glob.glob('green*') + glob.glob('fhv*')
 
 """
 It downloads the parquet file, converts it to csv (with compression: 800MB -> 100MB) and then saves it to data/.
