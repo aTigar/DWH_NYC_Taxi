@@ -38,9 +38,9 @@ def requests_data():
                             logger.info(f'Request {file_tmp}...')
                             r = requests.get(url_tmp)
                             if r.status_code == 403:
-                                logger.warning('Error 403: To many requests. Waiting a bit..')
-                                sleep(300)  # cooldown 5 minutes
-                                continue
+                                logger.warning('Error 403: Access denied. - try next.')
+                                # sleep(300)  # cooldown 5 minutes
+                                break
                             if r.status_code == 404:
                                 logger.warning('Error 404: file not available - try next.')
                                 break
