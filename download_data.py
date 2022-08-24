@@ -5,7 +5,6 @@ from time import sleep
 from loguru import logger
 import pandas as pd
 import requests
-import wget
 
 # Years of data to download (currently 2018 - present)
 years = ['2018', '2019', '2020', '2021', '2022']
@@ -40,19 +39,22 @@ def requests_data():
                 if file_tmp not in files:
                     downloaded = False
                     while not downloaded:
-                        logger.info(f'try and get {file_tmp}')
+                        logger.info(f'Request {file_tmp}...')
                         r = requests.get(url_tmp)
                         if r.status_code == 403:
                             logger.warning('Error 403: waiting a bit..')
                             sleep(10)
                             continue
                         if r.status_code == 404:
-                            logger.info('Error 404: try next.')
+                            logger.warning('Error 404: file not available - try next.')
                             break
-                        with open(file_tmp, 'wb') as f:
-                            f.write(r.content)
-                            logger.success(f'Saved {file_tmp}.')
-                            downloaded = True
+                        if r.status_code == 200:
+                            with open(file_tmp, 'wb') as f:
+                                f.write(r.content)
+                                logger.success(f'Saved {file_tmp}.')
+                                downloaded = True
+                        else:
+                            logger.error(f'Some unexpected errorcode occured: {r.status_code}')
 
 
 if __name__ == "__main__":
