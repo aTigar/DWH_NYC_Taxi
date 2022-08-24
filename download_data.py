@@ -1,6 +1,5 @@
 import glob
 import os
-from time import sleep
 
 import requests
 from loguru import logger
@@ -14,7 +13,7 @@ def requests_data():
     # Months of data to download
     months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
 
-    types = ['yellow', 'green', 'fhv', 'fhvhv']
+    types = ['yellow', 'green', 'fhv']
     url_add = 'https://d37ci6vzurychx.cloudfront.net/trip-data/'
 
     if not os.path.exists('data'):
@@ -33,24 +32,20 @@ def requests_data():
                     file_tmp = x + '_' + z + '_' + y + '.parquet'
 
                     if file_tmp not in files:
-                        downloaded = False
-                        while not downloaded:
-                            logger.info(f'Request {file_tmp}...')
-                            r = requests.get(url_tmp)
-                            if r.status_code == 403:
-                                logger.warning('Error 403: Access denied. - try next.')
-                                # sleep(300)  # cooldown 5 minutes
-                                break
-                            if r.status_code == 404:
-                                logger.warning('Error 404: file not available - try next.')
-                                break
-                            if r.status_code == 200:
-                                with open(file_tmp, 'wb') as f:
-                                    f.write(r.content)
-                                    logger.success(f'Saved {file_tmp}.')
-                                    downloaded = True
-                            else:
-                                logger.error(f'Some unexpected error code occurred: {r.status_code}')
+                        logger.info(f'Request {file_tmp}...')
+                        r = requests.get(url_tmp)
+                        if r.status_code == 403:
+                            logger.warning('Error 403: Access denied. - try next.')
+                            break
+                        if r.status_code == 404:
+                            logger.warning('Error 404: file not available - try next.')
+                            break
+                        if r.status_code == 200:
+                            with open(file_tmp, 'wb') as f:
+                                f.write(r.content)
+                                logger.success(f'Saved {file_tmp}.')
+                        else:
+                            logger.error(f'Some unexpected error code occurred: {r.status_code}')
     except KeyboardInterrupt as e:
         logger.info('Keyboard interrupt. Clean up directory..')
         temp_files = glob.glob('*temp')
