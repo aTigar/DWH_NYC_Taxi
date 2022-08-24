@@ -2,10 +2,6 @@ import glob
 import os
 import pandas as pd
 import requests
-import pyarrow.parquet as pq
-
-pd.read_parquet("fhv_tripdata_2018-05.parquet")
-
 
 # Years of data to download (currently 2018 - present)
 years = ['2018', '2019', '2020', '2021', '2022']
