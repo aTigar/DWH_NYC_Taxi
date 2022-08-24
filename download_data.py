@@ -16,11 +16,11 @@ def requests_data():
     types = ['yellow', 'green', 'fhv']
     url_add = 'https://d37ci6vzurychx.cloudfront.net/trip-data/'
 
-    if not os.path.exists('data'):
-        os.mkdir('./data')
+    if not os.path.exists('/data/taxi/'):
+        os.mkdir('./data/taxi/')
 
     # Set the download directory
-    os.chdir('data/')
+    os.chdir('data/taxi/')
     # Get list of already downloaded files
     files = glob.glob('yellow*') + glob.glob('green*') + glob.glob('fhv*')
 
