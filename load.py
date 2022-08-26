@@ -104,11 +104,16 @@ def requests_covid_data():
 
 def load_taxi_data():
     subdir = f'.{os.sep}data{os.sep}taxi{os.sep}'
-    files = glob.glob(f'{subdir}yellow*') + glob.glob(f'{subdir}green*') + glob.glob(f'{subdir}fhv*')
+    files = glob.glob(f'{subdir}fhv*') #glob.glob(f'{subdir}yellow*') + glob.glob(f'{subdir}green*') +
     df = pd.DataFrame()
     schema = pa.schema([
+        ('dispatching_base_num', pa.string()),
         ('dropOff_datetime', pa.int64()),
-        ('pickup_datetime', pa.int64())
+        ('pickup_datetime', pa.int64()),
+        ('PUlocationID', pa.float64()),
+        ('DOlocationID', pa.float64()),
+        ('SR_Flag', pa.float64()),
+        ('Affiliated_base_number', pa.string()),
     ])
     # dataset = pq.ParquetDataset(files[5])
     # table = dataset.read()
@@ -116,6 +121,8 @@ def load_taxi_data():
         try:
             logger.info(f'file {file}:')
             # df_new = pd.read_parquet(file, engine='pyarrow', coerce_int96_timestamp_unit='ms')
+            df_arrow1 = pq.read_table(file).to_pandas()
+            print(df_arrow1.dtypes)
             df_arrow = pq.read_table(file, schema=schema).to_pandas()
             # df = pd.concat([df, df_new], ignore_index=True)
             logger.success(f'file {file} rox.')
