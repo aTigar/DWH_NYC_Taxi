@@ -5,6 +5,8 @@ import numpy
 import pandas as pd
 import requests
 from loguru import logger
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 workdir = os.getcwd()
 
