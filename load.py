@@ -7,6 +7,7 @@ import requests
 from loguru import logger
 import pyarrow as pa
 import pyarrow.parquet as pq
+import pyarrow.dataset as ds
 
 workdir = os.getcwd()
 
@@ -110,9 +111,12 @@ def load_taxi_data():
         ('dispatching_base_num', pa.string()),
         ('dropOff_datetime', pa.int64()),
         ('pickup_datetime', pa.int64()),
-        ('PUlocationID', pa.float64()),
-        ('DOlocationID', pa.float64()),
+        ('PUlocationID', pa.int64()),
+        ('DOlocationID', pa.int64()),
+        ('PULocationID', pa.int64()),
+        ('DOLocationID', pa.int64()),
         ('SR_Flag', pa.float64()),
+        ('painis', pa.float64()),
         ('Affiliated_base_number', pa.string()),
     ])
     # dataset = pq.ParquetDataset(files[5])
@@ -121,17 +125,36 @@ def load_taxi_data():
         try:
             logger.info(f'file {file}:')
             # df_new = pd.read_parquet(file, engine='pyarrow', coerce_int96_timestamp_unit='ms')
-            df_arrow1 = pq.read_table(file).to_pandas()
-            print(df_arrow1.dtypes)
-            df_arrow = pq.read_table(file, schema=schema).to_pandas()
-            # df = pd.concat([df, df_new], ignore_index=True)
+            # df_arrow1 = pq.read_table(file).to_pandas()
+            # print(df_arrow1.dtypes)
+            table = ds.dataset(file).to_table()
+            df_new = fix_schema(table).to_pandas()
+            # df_new = pq.read_table(file, schema=schema).to_pandas()
+            df = pd.concat([df, df_new], ignore_index=True)
             logger.success(f'file {file} rox.')
         except Exception as e:
             logger.error(f'file {file} broken.')
             logger.error(str(e))
             continue
-    print('Hi')
+    df.to_csv('./data/test.csv')
     return pd.DataFrame
+
+
+def fix_schema(table):
+    """
+    This
+    :param table:
+    :return:
+    """
+    schema = table.schema
+    field_names = ['dropOff_datetime', 'pickup_datetime', 'tpep_dropoff_datetime', 'tpep_pickup_datetime']
+    field_index = [schema.get_field_index(name) for name in field_names]
+    # set new fields
+    for i in range(len(field_names)):
+        if not field_index[i] == -1:
+            schema = schema.set(field_index[i], pa.field(field_names[i], pa.int64()))
+    table = table.cast(target_schema=schema)
+    return table
 
 
 def load_covid_data():
