@@ -1,6 +1,8 @@
 import glob
 import os
 
+import numpy
+import pandas as pd
 import requests
 from loguru import logger
 
@@ -98,6 +100,40 @@ def requests_covid_data():
     os.chdir(workdir)
 
 
+def load_taxi_data():
+    subdir = f'.{os.sep}data{os.sep}taxi{os.sep}'
+    files = glob.glob(f'{subdir}yellow*') + glob.glob(f'{subdir}green*') + glob.glob(f'{subdir}fhv*')
+    df = pd.DataFrame()
+    schema = pa.schema([
+        ('dropOff_datetime', pa.int64()),
+        ('pickup_datetime', pa.int64())
+    ])
+    # dataset = pq.ParquetDataset(files[5])
+    # table = dataset.read()
+    for file in files:
+        try:
+            logger.info(f'file {file}:')
+            # df_new = pd.read_parquet(file, engine='pyarrow', coerce_int96_timestamp_unit='ms')
+            df_arrow = pq.read_table(file, schema=schema).to_pandas()
+            # df = pd.concat([df, df_new], ignore_index=True)
+            logger.success(f'file {file} rox.')
+        except Exception as e:
+            logger.error(f'file {file} broken.')
+            logger.error(str(e))
+            continue
+    print('Hi')
+    return pd.DataFrame
+
+
+def load_covid_data():
+    return pd.DataFrame
+
+
+def load_weather_data():
+    return pd.DataFrame
+
+
 if __name__ == "__main__":
-    requests_taxi_data()
-    requests_covid_data()
+    load_taxi_data()
+    # requests_taxi_data()
+    # requests_covid_data()
