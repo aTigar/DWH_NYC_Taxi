@@ -3,6 +3,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 import pyodbc
+import pandas as pd
 
 load_dotenv()
 server = os.getenv('SERVER')

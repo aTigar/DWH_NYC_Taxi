@@ -68,7 +68,7 @@ def requests_covid_data():
         # https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3
         'https://health.data.ny.gov/resource/jw46-jpb7.csv',
         # https://health.data.ny.gov/Health/New-York-State-Statewide-COVID-19-Hospitalizations/jw46-jpb7
-        'https://health.data.ny.gov/resource/qutr-irdf.csv'
+        # 'https://health.data.ny.gov/resource/qutr-irdf.csv'
         # https://health.data.ny.gov/Health/New-York-Forward-COVID-19-Daily-Hospitalization-Su/qutr-irdf
     ]
 
@@ -77,7 +77,7 @@ def requests_covid_data():
     # Set the download directory
     os.chdir('data/covid/')
     # Get list of already downloaded files
-    files = glob.glob(urls[0].split('/')[-1]) + glob.glob(urls[1].split('/')[-1]) + glob.glob(urls[2].split('/')[-1])
+    files = glob.glob(urls[0].split('/')[-1]) + glob.glob(urls[1].split('/')[-1])
 
     try:
         for url in urls:
