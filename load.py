@@ -105,7 +105,7 @@ def requests_covid_data():
 
 def load_taxi_data():
     subdir = f'.{os.sep}data{os.sep}taxi{os.sep}'
-    files = glob.glob(f'{subdir}fhv*') #glob.glob(f'{subdir}yellow*') + glob.glob(f'{subdir}green*') +
+    files = glob.glob(f'{subdir}yellow*') + glob.glob(f'{subdir}green*') + glob.glob(f'{subdir}fhv*')
     df = pd.DataFrame()
     schema = pa.schema([
         ('dispatching_base_num', pa.string()),
