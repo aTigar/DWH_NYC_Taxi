@@ -103,41 +103,36 @@ def requests_covid_data():
     os.chdir(workdir)
 
 
-def load_taxi_data():
-    subdir = f'.{os.sep}data{os.sep}taxi{os.sep}'
-    files = glob.glob(f'{subdir}yellow*') + glob.glob(f'{subdir}green*') + glob.glob(f'{subdir}fhv*')
+def load_taxi_data(file: str):
     df = pd.DataFrame()
-    schema = pa.schema([
-        ('dispatching_base_num', pa.string()),
-        ('dropOff_datetime', pa.int64()),
-        ('pickup_datetime', pa.int64()),
-        ('PUlocationID', pa.int64()),
-        ('DOlocationID', pa.int64()),
-        ('PULocationID', pa.int64()),
-        ('DOLocationID', pa.int64()),
-        ('SR_Flag', pa.float64()),
-        ('painis', pa.float64()),
-        ('Affiliated_base_number', pa.string()),
-    ])
+    # schema = pa.schema([
+    #     ('dispatching_base_num', pa.string()),
+    #     ('dropOff_datetime', pa.int64()),
+    #     ('pickup_datetime', pa.int64()),
+    #     ('PUlocationID', pa.int64()),
+    #     ('DOlocationID', pa.int64()),
+    #     ('PULocationID', pa.int64()),
+    #     ('DOLocationID', pa.int64()),
+    #     ('SR_Flag', pa.float64()),
+    #     ('painis', pa.float64()),
+    #     ('Affiliated_base_number', pa.string()),
+    # ])
     # dataset = pq.ParquetDataset(files[5])
     # table = dataset.read()
-    for file in files:
-        try:
-            logger.info(f'file {file}:')
-            # df_new = pd.read_parquet(file, engine='pyarrow', coerce_int96_timestamp_unit='ms')
-            # df_arrow1 = pq.read_table(file).to_pandas()
-            # print(df_arrow1.dtypes)
-            table = ds.dataset(file).to_table()
-            df_new = fix_schema(table).to_pandas()
-            # df_new = pq.read_table(file, schema=schema).to_pandas()
-            df = pd.concat([df, df_new], ignore_index=True)
-            logger.success(f'file {file} rox.')
-        except Exception as e:
-            logger.error(f'file {file} broken.')
-            logger.error(str(e))
-            continue
-    df.to_csv('./data/test.csv')
-    return pd.DataFrame
+    try:
+        logger.info(f'file {file}:')
+        # df_new = pd.read_parquet(file, engine='pyarrow', coerce_int96_timestamp_unit='ms')
+        # df_arrow1 = pq.read_table(file).to_pandas()
+        # print(df_arrow1.dtypes)
+        table = ds.dataset(file).to_table()
+        df = fix_schema(table).to_pandas()
+        # df_new = pq.read_table(file, schema=schema).to_pandas()
+        logger.success(f'file {file} rox.')
+    except Exception as e:
+        logger.error(f'file {file} broken.')
+        logger.error(str(e))
+    # df.to_csv('./data/test.csv')
+    return df
 
 
 def fix_schema(table):
@@ -147,7 +142,7 @@ def fix_schema(table):
     :return:
     """
     schema = table.schema
-    field_names = ['dropOff_datetime', 'pickup_datetime', 'tpep_dropoff_datetime', 'tpep_pickup_datetime']
+    field_names = ['pickup_datetime', 'dropOff_datetime','tpep_dropoff_datetime', 'tpep_pickup_datetime']  # --> green?
     field_index = [schema.get_field_index(name) for name in field_names]
     # set new fields
     for i in range(len(field_names)):
