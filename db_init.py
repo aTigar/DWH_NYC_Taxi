@@ -50,7 +50,7 @@ def prepare_covid_data():
 
     df_final = pd.DataFrame()
 
-    df_raw = load.load_covid_data(file)
+    df_raw = load.load_csv_data(file)
     df_clean = transform.clean_covid_data(df_raw)
     df_final = pd.concat([df_final, df_clean])
 
