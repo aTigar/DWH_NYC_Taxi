@@ -1,7 +1,10 @@
 import pandas as pd
+import os
+import load
+import numpy as np
 from loguru import logger
-from geopy.geocoders import Nominatim
-import geopy.distance
+
+from config import *
 
 column_mapper = {'tpep_pickup_datetime': 'pickup_datetime',
                  'tpep_dropoff_datetime': 'dropoff_datetime',
@@ -29,7 +32,29 @@ taxi_zone_lookup['location'] = taxi_zone_lookup['Borough'] + taxi_zone_lookup['t
 taxi_zone_lookup = taxi_zone_lookup[['LocationID', 'location']]
 taxi_zone_lookup = taxi_zone_lookup.set_index('LocationID').to_dict()['location']
 
-def clean_taxi_data(df: pd.DataFrame):
+
+# Source: http://stackoverflow.com/a/29546836/2901002
+def haversine_np(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance between two points
+    on the earth (specified in decimal degrees)
+
+    All args must be of equal length.
+
+    """
+    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = np.sin(dlat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0) ** 2
+
+    c = 2 * np.arcsin(np.sqrt(a))
+    km = 6367 * c
+    return km
+
+
+def clean_taxi_data(df: pd.DataFrame, taxi_type: str):
     """
     clean pd.DataFrame
     :return:
@@ -73,9 +98,24 @@ def clean_taxi_data(df: pd.DataFrame):
         'trip_distance': 'mean'
     }
 
-    if 'trip_distance' not in list(df.columns):
-        # calculate distance via locations
-        print('')
+    if "trip_distance" not in list(df.columns):
+        logger.info('trip_distance not available: calculating...')
+
+        # delete empty location IDs
+        df = df.dropna(subset=['PUlocationID', 'DOlocationID'])
+
+        # map ID to name
+        df['PUlocation_lat'] = df['PUlocationID'].astype(int).map(TAXI_ZONE_LOOKUP['lat'])
+        df['PUlocation_long'] = df['PUlocationID'].astype(int).map(TAXI_ZONE_LOOKUP['long'])
+        df['DOlocation_lat'] = df['DOlocationID'].astype(int).map(TAXI_ZONE_LOOKUP['lat'])
+        df['DOlocation_long'] = df['DOlocationID'].astype(int).map(TAXI_ZONE_LOOKUP['long'])
+
+        df = df.dropna(subset=['PUlocation_long', 'DOlocation_long'])
+
+        df['trip_distance'] = haversine_np(df['PUlocation_long'], df['PUlocation_lat'],
+                                           df['DOlocation_long'], df['DOlocation_lat'])
+
+        logger.success('trip_distance calculated.')
 
     df_group = df.groupby('date')
     df_daily = pd.DataFrame()
@@ -105,9 +145,14 @@ def get_distance_from_location(loc1: int, loc2: int):
     :param loc2:
     :return: distance from center of locations
     """
+    if not pd.notna(loc1) or not pd.notna(loc2):
+        return None
 
     loc1 = taxi_zone_lookup[loc1]
     loc2 = taxi_zone_lookup[loc2]
+
+    if not isinstance(loc2, str) or not isinstance(loc1, str):
+        return None
 
     if '/' in list(loc1):
         loc1.replace('/', ' ')
@@ -120,6 +165,9 @@ def get_distance_from_location(loc1: int, loc2: int):
 
     location1 = geolocator.geocode(loc1)
     location2 = geolocator.geocode(loc2)
+
+    if location1 is None or location2 is None:
+        return None
 
     coord1 = (location1.latitude, location1.longitude)
     coord2 = (location2.latitude, location2.longitude)

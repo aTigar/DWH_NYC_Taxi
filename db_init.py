@@ -33,15 +33,23 @@ def get_meta_info():
 
 def prepare_taxi_data():
     subdir = f'.{os.sep}data{os.sep}taxi{os.sep}'
-    files = glob.glob(f'{subdir}yellow*') + glob.glob(f'{subdir}green*') + glob.glob(f'{subdir}fhv*')
 
-    # files = [files[50], files[51], files[52]]  # TODO delete this row before deployment
+    yellow_files = (glob.glob(f'{subdir}yellow*'), 'yellow')
+    green_files = (glob.glob(f'{subdir}green*'), 'green')
+    fhv_files = (glob.glob(f'{subdir}fhv*'), 'fhv')
+
+    file_types = [yellow_files, green_files, fhv_files]
+
+    # files = [files[-1], files[-2], files[-3]]  # TODO delete this row before deployment
 
     df_final = pd.DataFrame()
-    for file in files:
-        df_raw = load.load_taxi_data(file)
-        df_clean = transform.clean_taxi_data(df_raw)
-        df_final = pd.concat([df_final, df_clean])
+    for file_type in file_types:
+        files = file_type[0]
+        taxi_type = file_type[1]
+        for file in files:
+            df_raw = load.load_taxi_data(file)
+            df_clean = transform.clean_taxi_data(df_raw, taxi_type)
+            df_final = pd.concat([df_final, df_clean])
     return df_final
 
 def prepare_covid_data():
