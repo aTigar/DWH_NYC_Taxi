@@ -152,15 +152,23 @@ def fix_schema(table):
     return table
 
 
-def load_covid_data():
-    return pd.DataFrame
 
 
-def load_weather_data():
-    return pd.DataFrame
+def load_csv_data(file: str):
+
+    df = pd.DataFrame()
+
+    try:
+        logger.info(f'file {file}')
+        df = pd.read_csv(file)
+        logger.success(f'file {file} rox.')
+    except Exception as e:
+        logger.error(f'file {file} broken.')
+
+    return df
 
 
 if __name__ == "__main__":
-    load_taxi_data()
-    # requests_taxi_data()
+    # load_taxi_data()
+    requests_taxi_data()
     # requests_covid_data()

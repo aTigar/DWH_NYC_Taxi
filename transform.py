@@ -1,5 +1,4 @@
 import pandas as pd
-import load
 from loguru import logger
 from geopy.geocoders import Nominatim
 import geopy.distance
@@ -11,6 +10,19 @@ column_mapper = {'tpep_pickup_datetime': 'pickup_datetime',
                  'PULocationID': 'PUlocationID',
                  'DOLocationID': 'DOlocationID',
                  }
+weather_column_mapper = {
+    'WT01' : 'FOG',     # fog, ice fog or freezing fog (may include heavy fog) / value nan or 1.0
+    'WT02' : 'HFOG',    # heavy fog or heaving freezing fog (not always distinguished from fog) / value nan or 1.0
+    'WT03' : 'THUNDER', # thunder / value nan or 1.0
+    'WT04' : 'ICEP',    # ice pellets, sleet, snow pellets or small hail / value nan or 1.0
+    'WT05' : 'HAIL',    # hail (may include small hail) / value nan or 1.0
+    'WT06' : 'GLAZE',   # glaze or rime / value nan or 1.0
+    'WT07' : 'DUST',    # dust, volcanic ash, blowing dust, blowing sand or blowing obstruction / value nan or 1.0
+    'WT08' : 'SMOKE',   # smoke or haze / value nan or 1.0
+    'WT09' : 'BLOW',    # blowing or drifting snow / value nan or 1.0
+    'WT11' : 'HWIND',   # high wind or damaging wind / value nan or 1.0
+}
+
 taxi_zone_lookup = pd.read_csv('data/taxi_zone_lookup.csv')
 taxi_zone_lookup['temp'] = ' '
 taxi_zone_lookup['location'] = taxi_zone_lookup['Borough'] + taxi_zone_lookup['temp'] + taxi_zone_lookup['Zone']
@@ -117,23 +129,34 @@ def get_distance_from_location(loc1: int, loc2: int):
     return distance
 
 
-def get_clean_covid_data():
+def clean_covid_data(df: pd.DataFrame):
     """
     clean pd.DataFrame
     :return:
     """
-    df = load.load_covid_data()
-    # clean
+    logger.info('cleaning covid data ...')
+
+    # convert timestamp to yyyy-mm-dd
+    df['date_of_interest'] = pd.to_datetime(df['date_of_interest']).dt.date
+
     return df
 
 
-def get_clean_weather_data():
+def clean_weather_data(df: pd.DataFrame):
     """
     clean pd.DataFrame
     :return:
     """
-    df = load.load_weather_data()
-    # clean
+    logger.info('cleaning weather data ...')
+    # convert timestamp to yyyy-mm-dd
+    df['DATE'] = pd.to_datetime(df['DATE']).dt.date
+    # remove unnecessary columns
+    df = df.drop(['NAME', 'STATION'],axis=1)
+    # rename columns for better identification
+    df = df.rename(columns=weather_column_mapper)
+
+    logger.success('cleaning weather done.')
+
     return df
 
 

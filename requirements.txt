@@ -38,3 +38,6 @@ urllib3==1.26.12
     # via requests
 win32-setctime==1.1.0
     # via loguru
+
+pyarrow==9.0.0
+geopy==2.2.0
