@@ -137,45 +137,6 @@ def clean_taxi_data(df: pd.DataFrame, taxi_type: str):
     return df_daily
 
 
-def get_distance_from_location(loc1: int, loc2: int):
-    """
-    calculates the estimated distance for two given locations.
-    Query: Borough + Zone
-    :param loc1:
-    :param loc2:
-    :return: distance from center of locations
-    """
-    if not pd.notna(loc1) or not pd.notna(loc2):
-        return None
-
-    loc1 = taxi_zone_lookup[loc1]
-    loc2 = taxi_zone_lookup[loc2]
-
-    if not isinstance(loc2, str) or not isinstance(loc1, str):
-        return None
-
-    if '/' in list(loc1):
-        loc1.replace('/', ' ')
-
-    if '/' in list(loc2):
-        loc2.replace('/', ' ')
-
-    geolocator = Nominatim(user_agent="DWH_NYC")
-
-    location1 = geolocator.geocode(loc1)
-    location2 = geolocator.geocode(loc2)
-
-    if location1 is None or location2 is None:
-        return None
-
-    coord1 = (location1.latitude, location1.longitude)
-    coord2 = (location2.latitude, location2.longitude)
-
-    distance = geopy.distance.geodesic(coord1, coord2).km
-
-    return distance
-
-
 def clean_covid_data(df: pd.DataFrame):
     """
     clean pd.DataFrame
