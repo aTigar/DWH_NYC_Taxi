@@ -166,7 +166,7 @@ def load_covid_data(file: str):
     return df
 
 
-def load_weather_data(file: str):
+def load_csv_data(file: str):
 
     df = pd.DataFrame()
 
