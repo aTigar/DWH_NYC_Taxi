@@ -160,7 +160,6 @@ def get_distance_from_location(loc1: int, loc2: int):
     if '/' in list(loc2):
         loc2.replace('/', ' ')
 
-    logger.info(f"Get distance from {loc1} and {loc2}")
     geolocator = Nominatim(user_agent="DWH_NYC")
 
     location1 = geolocator.geocode(loc1)
