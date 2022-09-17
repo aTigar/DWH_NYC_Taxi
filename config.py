@@ -50,4 +50,11 @@ else:
 
 TAXI_ZONE_LOOKUP = taxi_zone_lookup[['LocationID', 'lat', 'long']].set_index('LocationID').to_dict()
 
+# database
+SERVER = os.getenv('SERVER')
+DATABASE = os.getenv('DATABASE')
+USER = os.getenv('USER')
+PASSWORD = os.getenv('PASSWORD')
+
+
 
