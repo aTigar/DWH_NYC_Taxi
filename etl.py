@@ -1,15 +1,8 @@
 import glob
-import os
-import urllib
-
-import pandas as pd
-from dotenv import load_dotenv
-from loguru import logger
-from sqlalchemy import create_engine
 
 import extract
-import transform
 import load
+import transform
 from config import *
 
 

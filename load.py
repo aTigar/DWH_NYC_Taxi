@@ -1,14 +1,10 @@
-from typing import Optional, Union
+from typing import Optional
 
-import pyodbc
 import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
-import pandas as pd
 
-import extract
 from config import *
-import etl
 
 
 def connect_sqlalchemy(username: str, password: str, host: str, database: str):

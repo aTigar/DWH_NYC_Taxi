@@ -1,13 +1,11 @@
 import glob
 import os
 
-import numpy
 import pandas as pd
+import pyarrow as pa
+import pyarrow.dataset as ds
 import requests
 from loguru import logger
-import pyarrow as pa
-import pyarrow.parquet as pq
-import pyarrow.dataset as ds
 
 workdir = os.getcwd()
 
@@ -15,7 +13,7 @@ workdir = os.getcwd()
 def requests_taxi_data():
     """function to download specific taxi parquet files
     """
-    logger.info("Downloading taxi-data")
+    logger.info('Downloading taxi-data...')
     # Years of data to download (currently 2018 - present)
     years = ['2018', '2019', '2020', '2021', '2022']
     # Months of data to download

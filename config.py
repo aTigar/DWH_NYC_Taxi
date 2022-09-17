@@ -1,11 +1,10 @@
-import os
-import pandas as pd
-from loguru import logger
 import os.path
-from geopy.geocoders import Bing
-import geopy.distance
-from geopy.extra.rate_limiter import RateLimiter
+
+import pandas as pd
 from dotenv import load_dotenv
+from geopy.extra.rate_limiter import RateLimiter
+from geopy.geocoders import Bing
+from loguru import logger
 
 load_dotenv('.env')
 

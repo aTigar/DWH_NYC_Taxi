@@ -1,8 +1,4 @@
-import pandas as pd
-import os
-import extract
 import numpy as np
-from loguru import logger
 
 from config import *
 
@@ -85,12 +81,12 @@ def clean_taxi_data(df: pd.DataFrame):
     # if 'lpep_pickup_datetime' in list(df.columns):
     #    df = df.rename(columns={'lpep_pickup_datetime': 'pickup_datetime', 'lpep_dropoff_datetime': 'dropoff_datetime'})
 
-    logger.info('cleaning datetime ...')
+    logger.info('Cleaning datetime ...')
     # df['date'] = df['pickup_datetime'].apply(lambda x: pd.to_datetime(x, unit='us').strftime('%Y-%m-%d'))
     df['date'] = pd.to_datetime(df['pickup_datetime'], unit='us').dt.date
     # df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
     # df['date'] =) df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-    logger.success('datetime cleaned.')
+    logger.success('Datetime cleaned.')
 
     meta_data = {
         'PUlocationID': 'value_count',
@@ -119,7 +115,7 @@ def clean_taxi_data(df: pd.DataFrame):
 
     df_group = df.groupby('date')
     df_daily = pd.DataFrame()
-    logger.info('extract features ...')
+    logger.info('Extract features ...')
     for feature in meta_data:
         if feature in list(df.columns):
             combine_type = meta_data[feature]
@@ -132,7 +128,7 @@ def clean_taxi_data(df: pd.DataFrame):
             df_daily = pd.concat([df_daily, df_new], axis=1)
         else:
             logger.warning(f'{feature} not found.')
-    logger.success('features extracted.')
+    logger.success('Features extracted.')
 
     return df_daily
 
@@ -142,7 +138,7 @@ def clean_covid_data(df: pd.DataFrame):
     clean pd.DataFrame
     :return:
     """
-    logger.info('cleaning covid data ...')
+    logger.info('Cleaning covid data ...')
 
     # convert timestamp to yyyy-mm-dd
     df['date_of_interest'] = pd.to_datetime(df['date_of_interest']).dt.date
@@ -155,7 +151,7 @@ def clean_weather_data(df: pd.DataFrame):
     clean pd.DataFrame
     :return:
     """
-    logger.info('cleaning weather data ...')
+    logger.info('Cleaning weather data ...')
     # convert timestamp to yyyy-mm-dd
     df['DATE'] = pd.to_datetime(df['DATE']).dt.date
     # remove unnecessary columns
@@ -163,7 +159,7 @@ def clean_weather_data(df: pd.DataFrame):
     # rename columns for better identification
     df = df.rename(columns=weather_column_mapper)
 
-    logger.success('cleaning weather done.')
+    logger.success('Cleaning weather done.')
 
     return df
 
