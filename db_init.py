@@ -41,7 +41,7 @@ def prepare_taxi_data(taxi_type: str) -> pd.DataFrame:
     """
     subdir = f'.{os.sep}data{os.sep}taxi{os.sep}'
 
-    files = (glob.glob(f'{subdir}{taxi_type}*'), taxi_type)
+    files = glob.glob(f'{subdir}{taxi_type}*')
 
     df_final = pd.DataFrame()
 
@@ -83,8 +83,9 @@ if __name__ == '__main__':
     # logger.info('Connect to DB')
     # print(get_meta_info())
     # logger.success('done')
-    df = prepare_taxi_data()
-    df.to_csv('taxi_test2.csv')
+    taxi_types = ['yellow', 'green', 'fhv']
+    df = prepare_taxi_data(taxi_types[0])
+    df.to_csv('taxi_test3.csv')
     # df = prepare_weather_data()
     # df = prepare_covid_data()
     logger.success('u did it')
