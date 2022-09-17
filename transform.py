@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-import load
+import extract
 import numpy as np
 from loguru import logger
 

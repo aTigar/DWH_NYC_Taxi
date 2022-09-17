@@ -7,29 +7,10 @@ from dotenv import load_dotenv
 from loguru import logger
 from sqlalchemy import create_engine
 
-import load
+import extract
 import transform
-
-load_dotenv()
-server = os.getenv('SERVER')
-database = os.getenv('DATABASE')
-username = os.getenv('USER')
-password = os.getenv('PASSWORD')
-
-META_TABLE_NAME = 'name'
-
-params = urllib.parse.quote_plus(
-    "'DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password")
-
-engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
-
-
-def get_meta_info():
-    table_df = pd.read_sql_table(
-        META_TABLE_NAME,
-        con=engine
-    )
-    return table_df
+import load
+from config import *
 
 
 def prepare_taxi_data(taxi_type: str) -> pd.DataFrame:
@@ -46,7 +27,7 @@ def prepare_taxi_data(taxi_type: str) -> pd.DataFrame:
     df_final = pd.DataFrame()
 
     for file in files:
-        df_raw = load.load_taxi_data(file)
+        df_raw = extract.load_taxi_data(file)
         df_clean = transform.clean_taxi_data(df_raw)
         df_final = pd.concat([df_final, df_clean])
     return df_final

@@ -17,6 +17,8 @@ api_key = os.environ['BING_API_KEY']
 geolocator = Bing(api_key=api_key)
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)  # convenient function to delay between geocoding calls
 
+TAXI_TYPES = ['yellow', 'green', 'fhv']
+
 if not os.path.isfile('data/taxi_zone_lookup_enhanced.csv'):
     logger.warning('No enhanced taxi lookup table found. Fallback to raw table.')
     taxi_lookup_path = 'data/taxi_zone_lookup.csv'
