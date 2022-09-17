@@ -10,16 +10,16 @@ column_mapper = {'tpep_pickup_datetime': 'pickup_datetime',
                  'DOLocationID': 'DOlocationID',
                  }
 weather_column_mapper = {
-    'WT01' : 'FOG',     # fog, ice fog or freezing fog (may include heavy fog) / value nan or 1.0
-    'WT02' : 'HFOG',    # heavy fog or heaving freezing fog (not always distinguished from fog) / value nan or 1.0
-    'WT03' : 'THUNDER', # thunder / value nan or 1.0
-    'WT04' : 'ICEP',    # ice pellets, sleet, snow pellets or small hail / value nan or 1.0
-    'WT05' : 'HAIL',    # hail (may include small hail) / value nan or 1.0
-    'WT06' : 'GLAZE',   # glaze or rime / value nan or 1.0
-    'WT07' : 'DUST',    # dust, volcanic ash, blowing dust, blowing sand or blowing obstruction / value nan or 1.0
-    'WT08' : 'SMOKE',   # smoke or haze / value nan or 1.0
-    'WT09' : 'BLOW',    # blowing or drifting snow / value nan or 1.0
-    'WT11' : 'HWIND',   # high wind or damaging wind / value nan or 1.0
+    'WT01': 'FOG',     # fog, ice fog or freezing fog (may include heavy fog) / value nan or 1.0
+    'WT02': 'HFOG',    # heavy fog or heaving freezing fog (not always distinguished from fog) / value nan or 1.0
+    'WT03': 'THUNDER', # thunder / value nan or 1.0
+    'WT04': 'ICEP',    # ice pellets, sleet, snow pellets or small hail / value nan or 1.0
+    'WT05': 'HAIL',    # hail (may include small hail) / value nan or 1.0
+    'WT06': 'GLAZE',   # glaze or rime / value nan or 1.0
+    'WT07': 'DUST',    # dust, volcanic ash, blowing dust, blowing sand or blowing obstruction / value nan or 1.0
+    'WT08': 'SMOKE',   # smoke or haze / value nan or 1.0
+    'WT09': 'BLOW',    # blowing or drifting snow / value nan or 1.0
+    'WT11': 'HWIND',   # high wind or damaging wind / value nan or 1.0
 }
 
 taxi_zone_lookup = pd.read_csv('data/taxi_zone_lookup.csv')
