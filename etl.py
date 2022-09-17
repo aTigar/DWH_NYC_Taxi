@@ -54,6 +54,8 @@ def prepare_weather_data():
 
 
 if __name__ == '__main__':
+    logger.info('Starting...')
+
     engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
 
     df = prepare_covid_data()
@@ -66,5 +68,8 @@ if __name__ == '__main__':
 
     for taxi_type in TAXI_TYPES:
         df = prepare_taxi_data(taxi_type)
-        df.to_csv('covid.csv')
+        df.to_csv(f'{taxi_type}.csv')
         load.load_dataframe_to_database(df, f'taxi_{taxi_type}', engine)
+
+    logger.success('Done!')
+
