@@ -54,7 +54,7 @@ def haversine_np(lon1, lat1, lon2, lat2):
     return km
 
 
-def clean_taxi_data(df: pd.DataFrame, taxi_type: str):
+def clean_taxi_data(df: pd.DataFrame):
     """
     clean pd.DataFrame
     :return:
@@ -132,7 +132,6 @@ def clean_taxi_data(df: pd.DataFrame, taxi_type: str):
             df_daily = pd.concat([df_daily, df_new], axis=1)
         else:
             logger.warning(f'{feature} not found.')
-    df_daily['taxi_type'] = taxi_type
     logger.success('features extracted.')
 
     return df_daily

@@ -47,7 +47,7 @@ def prepare_taxi_data(taxi_type: str) -> pd.DataFrame:
 
     for file in files:
         df_raw = load.load_taxi_data(file)
-        df_clean = transform.clean_taxi_data(df_raw, taxi_type)
+        df_clean = transform.clean_taxi_data(df_raw)
         df_final = pd.concat([df_final, df_clean])
     return df_final
 
