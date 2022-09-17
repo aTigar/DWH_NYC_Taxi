@@ -39,16 +39,16 @@ def connect_pyodbc(db_env: tuple):
         logger.error('Connection to DB with pyodbc failed')
 
 
-def connect_sqlalchemy(db_env: tuple):
+def connect_sqlalchemy(username: str, password: str, host: str, database: str):
     logger.info('Connect to DB with SQLAlchemy...')
     try:
         connection_url = URL.create(
             "mssql+pyodbc",
-            username=db_env[0],
-            password=db_env[1],
-            host=db_env[2],
+            username=username,
+            password=password,
+            host=host,
             port=1433,
-            database=db_env[3],
+            database=database,
             query={
                 "driver": "ODBC Driver 18 for SQL Server",
                 "Trusted_Connection": "yes",
