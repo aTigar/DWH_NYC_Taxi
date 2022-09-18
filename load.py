@@ -24,7 +24,7 @@ def connect_sqlalchemy(username: str, password: str, host: str, database: str):
                 # "authentication": "ActiveDirectoryIntegrated",
             },
         )
-        engine = create_engine(connection_url)
+        engine = create_engine(connection_url, echo=True)
         # test connection
         ins = sqlalchemy.inspect(engine)
         ins.get_table_names()

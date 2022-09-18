@@ -155,7 +155,8 @@ def clean_weather_data(df: pd.DataFrame):
     # convert timestamp to yyyy-mm-dd
     df['DATE'] = pd.to_datetime(df['DATE']).dt.date
     # remove unnecessary columns
-    df = df.drop(['NAME', 'STATION'],axis=1)
+    # df = df.drop(['NAME', 'STATION'],axis=1)
+    df = df[df['STATION'] == 'USW00094789']
     # rename columns for better identification
     df = df.rename(columns=weather_column_mapper)
 
