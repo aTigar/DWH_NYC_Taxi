@@ -38,7 +38,7 @@ def connect_sqlalchemy(username: str, password: str, host: str, database: str):
 
 def load_dataframe_to_database(df_job: pd.DataFrame, table_name: str, engine: sqlalchemy.engine,
                                dtypes: Optional[dict] = None):
-    logger.info(f'Sending data to database table {table_name}...')
+    logger.info(f'Sending data {df_job.shape} to database table {table_name}...')
 
     sql_kwargs = {'name': table_name,
                   'con': engine,

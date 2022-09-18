@@ -1,3 +1,5 @@
+from datetime import datetime, date, timedelta
+
 import numpy as np
 
 from config import *
@@ -10,16 +12,16 @@ column_mapper = {'tpep_pickup_datetime': 'pickup_datetime',
                  'DOLocationID': 'DOlocationID',
                  }
 weather_column_mapper = {
-    'WT01': 'FOG',     # fog, ice fog or freezing fog (may include heavy fog) / value nan or 1.0
-    'WT02': 'HFOG',    # heavy fog or heaving freezing fog (not always distinguished from fog) / value nan or 1.0
-    'WT03': 'THUNDER', # thunder / value nan or 1.0
-    'WT04': 'ICEP',    # ice pellets, sleet, snow pellets or small hail / value nan or 1.0
-    'WT05': 'HAIL',    # hail (may include small hail) / value nan or 1.0
-    'WT06': 'GLAZE',   # glaze or rime / value nan or 1.0
-    'WT07': 'DUST',    # dust, volcanic ash, blowing dust, blowing sand or blowing obstruction / value nan or 1.0
-    'WT08': 'SMOKE',   # smoke or haze / value nan or 1.0
-    'WT09': 'BLOW',    # blowing or drifting snow / value nan or 1.0
-    'WT11': 'HWIND',   # high wind or damaging wind / value nan or 1.0
+    'WT01': 'FOG',  # fog, ice fog or freezing fog (may include heavy fog) / value nan or 1.0
+    'WT02': 'HFOG',  # heavy fog or heaving freezing fog (not always distinguished from fog) / value nan or 1.0
+    'WT03': 'THUNDER',  # thunder / value nan or 1.0
+    'WT04': 'ICEP',  # ice pellets, sleet, snow pellets or small hail / value nan or 1.0
+    'WT05': 'HAIL',  # hail (may include small hail) / value nan or 1.0
+    'WT06': 'GLAZE',  # glaze or rime / value nan or 1.0
+    'WT07': 'DUST',  # dust, volcanic ash, blowing dust, blowing sand or blowing obstruction / value nan or 1.0
+    'WT08': 'SMOKE',  # smoke or haze / value nan or 1.0
+    'WT09': 'BLOW',  # blowing or drifting snow / value nan or 1.0
+    'WT11': 'HWIND',  # high wind or damaging wind / value nan or 1.0
 }
 
 taxi_zone_lookup = pd.read_csv('data/taxi_zone_lookup.csv')
@@ -63,7 +65,7 @@ def clean_taxi_data(df: pd.DataFrame):
             sub_df = sub_df[sub_df[feature].notna()]
             sub_df = sub_df[feature].value_counts().reset_index()
             sub_df['temp'] = feature + '_'
-            sub_df['index'] = sub_df['index'].astype('str')
+            sub_df['index'] = sub_df['index'].astype('int').astype('str')
             sub_df['index'] = sub_df['temp'] + sub_df['index']
             sub_df = sub_df.drop(columns=['temp'])
             # sub_df['index'] = sub_df['index'].apply(lambda x: f'{feature}_{int(x)}')
@@ -84,8 +86,20 @@ def clean_taxi_data(df: pd.DataFrame):
     logger.info('Cleaning datetime ...')
     # df['date'] = df['pickup_datetime'].apply(lambda x: pd.to_datetime(x, unit='us').strftime('%Y-%m-%d'))
     df['date'] = pd.to_datetime(df['pickup_datetime'], unit='us').dt.date
-    # df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
-    # df['date'] =) df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+
+    # get year and month from data appearance
+    temp_df = pd.DataFrame()
+    temp_df['dates'] = list(set(df['date']))
+    temp_df['years'] = temp_df['dates'].apply(lambda x: x.year)
+    temp_df['months'] = temp_df['dates'].apply(lambda x: x.month)
+    temp_df = temp_df.value_counts(subset=['years', 'months'])
+    year, month = temp_df.index[0]
+    start_date = date(year, month, 1)
+    end_date = date(year, month, (start_date.replace(month=start_date.month % 12 + 1, day=1) - timedelta(days=1)).day)
+
+    # remove data rows with time outliers
+    df = df[df['date'].between(start_date, end_date)].copy()
+
     logger.success('Datetime cleaned.')
 
     meta_data = {
