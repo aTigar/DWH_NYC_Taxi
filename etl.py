@@ -6,7 +6,7 @@ import transform
 from config import *
 
 
-def prepare_taxi_data(taxi_type: str) -> pd.DataFrame:
+def prepare_taxi_data(taxi_type: str, pickup: bool, dropoff: bool) -> pd.DataFrame:
     """
     Prepares data from local storage for database.
 
@@ -21,7 +21,7 @@ def prepare_taxi_data(taxi_type: str) -> pd.DataFrame:
 
     for file in files:
         df_raw = extract.load_taxi_data(file)
-        df_clean = transform.clean_taxi_data(df_raw)
+        df_clean = transform.clean_taxi_data(df_raw, pickup, dropoff)
         df_final = pd.concat([df_final, df_clean])
     return df_final
 
@@ -67,9 +67,12 @@ if __name__ == '__main__':
     load.load_dataframe_to_database(df, 'weather', engine)
 
     for taxi_type in TAXI_TYPES:
-        df = prepare_taxi_data(taxi_type)
-        df.to_csv(f'{taxi_type}.csv')
-        load.load_dataframe_to_database(df, f'taxi_{taxi_type}', engine)
+        df_pu = prepare_taxi_data(taxi_type, pickup=True, dropoff=False)
+        df_do = prepare_taxi_data(taxi_type, dropoff=True, pickup=False)
+        df_pu.to_csv(f'{taxi_type}_pu.csv')
+        df_do.to_csv(f'{taxi_type}_do.csv')
+        load.load_dataframe_to_database(df_pu, f'taxi_{taxi_type}_pickup', engine)
+        load.load_dataframe_to_database(df_do, f'taxi_{taxi_type}_dropoff', engine)
 
     logger.success('Done!')
 
