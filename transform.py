@@ -177,6 +177,7 @@ def clean_covid_data(df: pd.DataFrame):
 
     # convert timestamp to yyyy-mm-dd
     df['date_of_interest'] = pd.to_datetime(df['date_of_interest']).dt.date
+    df = df.set_index('date_of_interest')
 
     return df
 
@@ -189,6 +190,7 @@ def clean_weather_data(df: pd.DataFrame):
     logger.info('Cleaning weather data ...')
     # convert timestamp to yyyy-mm-dd
     df['DATE'] = pd.to_datetime(df['DATE']).dt.date
+    df = df.set_index('DATE')
     # remove unnecessary columns
     # df = df.drop(['NAME', 'STATION'],axis=1)
     df = df[df['STATION'] == 'USW00094789']
