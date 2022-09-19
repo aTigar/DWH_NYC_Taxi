@@ -71,23 +71,31 @@ def prepare_weather_data():
 if __name__ == '__main__':
     logger.info('Starting...')
 
-    # engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
+    # init
+    engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
 
-    # df = prepare_covid_data()
-    # df.to_csv('covid.csv')
-    # load.load_dataframe_to_database(df, 'covid', engine)
-    #
-    # df = prepare_weather_data()
-    # df.to_csv('weather.csv')
-    # load.load_dataframe_to_database(df, 'weather', engine)
+    # covid data
+    df = prepare_covid_data()
+    df.to_csv('covid.csv')
+    load.load_dataframe_to_database(df, 'covid', engine)
 
+    # weather data
+    df = prepare_weather_data()
+    df.to_csv('weather.csv')
+    load.load_dataframe_to_database(df, 'weather', engine)
+
+    # taxi data
     for taxi_type in TAXI_TYPES:
         df_pu = prepare_taxi_data(taxi_type, pickup=True, dropoff=False)
         df_do = prepare_taxi_data(taxi_type, dropoff=True, pickup=False)
         df_pu.to_csv(f'{taxi_type}_pu.csv')
         df_do.to_csv(f'{taxi_type}_do.csv')
-        # load.load_dataframe_to_database(df_pu, f'taxi_{taxi_type}_pickup', engine)
-        # load.load_dataframe_to_database(df_do, f'taxi_{taxi_type}_dropoff', engine)
+        load.load_dataframe_to_database(df_pu, f'taxi_{taxi_type}_pickup', engine)
+        load.load_dataframe_to_database(df_do, f'taxi_{taxi_type}_dropoff', engine)
+
+    # taxi meta data
+    df = pd.read_csv('data/taxi_zone_lookup_enhanced.csv')
+    load.load_dataframe_to_database(df, 'taxi_lookup', engine)
 
     logger.success('Done!')
 

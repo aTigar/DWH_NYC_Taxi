@@ -47,7 +47,7 @@ else:
     taxi_zone_lookup = pd.read_csv(taxi_lookup_path)
 
 
-TAXI_ZONE_LOOKUP = taxi_zone_lookup[['LocationID', 'lat', 'long']].set_index('LocationID').to_dict()
+TAXI_ZONE_LOOKUP = taxi_zone_lookup.set_index('LocationID').to_dict()
 
 # database
 SERVER = os.getenv('SERVER')
