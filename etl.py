@@ -23,6 +23,21 @@ def prepare_taxi_data(taxi_type: str, pickup: bool, dropoff: bool) -> pd.DataFra
         df_raw = extract.load_taxi_data(file)
         df_clean = transform.clean_taxi_data(df_raw, pickup, dropoff)
         df_final = pd.concat([df_final, df_clean])
+
+    # sort features
+    cols = list(df_final.columns)
+    c_ints = []
+    c_str = []
+    for c in cols:
+        try:
+            c_ints.append(int(c))
+        except:
+            c_str.append(c)
+    c_ints.sort()
+    c_str.extend([str(i) for i in c_ints])
+
+    df_daily = df_final[c_str]
+
     return df_final
 
 
@@ -56,23 +71,23 @@ def prepare_weather_data():
 if __name__ == '__main__':
     logger.info('Starting...')
 
-    engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
+    # engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
 
-    df = prepare_covid_data()
-    df.to_csv('covid.csv')
-    load.load_dataframe_to_database(df, 'covid', engine)
-
-    df = prepare_weather_data()
-    df.to_csv('weather.csv')
-    load.load_dataframe_to_database(df, 'weather', engine)
+    # df = prepare_covid_data()
+    # df.to_csv('covid.csv')
+    # load.load_dataframe_to_database(df, 'covid', engine)
+    #
+    # df = prepare_weather_data()
+    # df.to_csv('weather.csv')
+    # load.load_dataframe_to_database(df, 'weather', engine)
 
     for taxi_type in TAXI_TYPES:
         df_pu = prepare_taxi_data(taxi_type, pickup=True, dropoff=False)
         df_do = prepare_taxi_data(taxi_type, dropoff=True, pickup=False)
         df_pu.to_csv(f'{taxi_type}_pu.csv')
         df_do.to_csv(f'{taxi_type}_do.csv')
-        load.load_dataframe_to_database(df_pu, f'taxi_{taxi_type}_pickup', engine)
-        load.load_dataframe_to_database(df_do, f'taxi_{taxi_type}_dropoff', engine)
+        # load.load_dataframe_to_database(df_pu, f'taxi_{taxi_type}_pickup', engine)
+        # load.load_dataframe_to_database(df_do, f'taxi_{taxi_type}_dropoff', engine)
 
     logger.success('Done!')
 
