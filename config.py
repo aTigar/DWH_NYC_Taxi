@@ -25,8 +25,6 @@ if not os.path.isfile('data/taxi_zone_lookup_enhanced.csv'):
     # combine full location name
     taxi_zone_lookup['location'] = taxi_zone_lookup['Borough'] + ' ' + taxi_zone_lookup['Zone']
 
-    taxi_zone_lookup = taxi_zone_lookup[['LocationID', 'location']]
-
     logger.info('Get geocodes from names ...')
     taxi_zone_lookup['geocode'] = taxi_zone_lookup['location'].apply(geocode).copy()
     logger.success('Fetched geocodes.')
