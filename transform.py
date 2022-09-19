@@ -52,23 +52,26 @@ def haversine_np(lon1, lat1, lon2, lat2):
     return km
 
 
-def clean_taxi_data(df: pd.DataFrame):
+def clean_taxi_data(df: pd.DataFrame, pickup: bool, dropoff: bool):
     """
     clean pd.DataFrame
     :return:
     """
 
     def get_value_counts_as_columns(df_group, feature):
+        """
+        pivots the summary for each location as columns
+
+        :param df_group: the key for the groups
+        :param feature: the key of the feature to extract
+        :return: dataframe with grouped summaries' ad columns
+        """
         ret_df = pd.DataFrame()
         for group in df_group.groups:
-            sub_df = df_group.get_group(group)  # .groupby('date')#
+            sub_df = df_group.get_group(group)
             sub_df = sub_df[sub_df[feature].notna()]
             sub_df = sub_df[feature].value_counts().reset_index()
-            sub_df['temp'] = feature + '_'
             sub_df['index'] = sub_df['index'].astype('int').astype('str')
-            sub_df['index'] = sub_df['temp'] + sub_df['index']
-            sub_df = sub_df.drop(columns=['temp'])
-            # sub_df['index'] = sub_df['index'].apply(lambda x: f'{feature}_{int(x)}')
             sub_df = sub_df.swapaxes(0, 1)
             sub_df.columns = list(sub_df.iloc[0])
             sub_df = sub_df.drop('index')
@@ -103,10 +106,13 @@ def clean_taxi_data(df: pd.DataFrame):
     logger.success('Datetime cleaned.')
 
     meta_data = {
-        'PUlocationID': 'value_count',
-        'DOlocationID': 'value_count',
         'trip_distance': 'mean'
     }
+
+    if pickup:
+        meta_data.update({'PUlocationID': 'value_count'})
+    if dropoff:
+        meta_data.update({'DOlocationID': 'value_count'})
 
     if "trip_distance" not in list(df.columns):
         logger.info('trip_distance not available: calculating...')
@@ -142,6 +148,21 @@ def clean_taxi_data(df: pd.DataFrame):
             df_daily = pd.concat([df_daily, df_new], axis=1)
         else:
             logger.warning(f'{feature} not found.')
+
+    # sort features
+    cols = list(df_daily.columns)
+    c_ints = []
+    c_str = []
+    for c in cols:
+        try:
+            c_ints.append(int(c))
+        except:
+            c_str.append(c)
+    c_ints.sort()
+    c_str.extend([str(i) for i in c_ints])
+
+    df_daily = df_daily[c_str]
+
     logger.success('Features extracted.')
 
     return df_daily
