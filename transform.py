@@ -148,6 +148,21 @@ def clean_taxi_data(df: pd.DataFrame, pickup: bool, dropoff: bool):
             df_daily = pd.concat([df_daily, df_new], axis=1)
         else:
             logger.warning(f'{feature} not found.')
+
+    # sort features
+    cols = list(df_daily.columns)
+    c_ints = []
+    c_str = []
+    for c in cols:
+        try:
+            c_ints.append(int(c))
+        except:
+            c_str.append(c)
+    c_ints.sort()
+    c_str.extend([str(i) for i in c_ints])
+
+    df_daily = df_daily[c_str]
+
     logger.success('Features extracted.')
 
     return df_daily
