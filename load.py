@@ -38,6 +38,8 @@ def connect_sqlalchemy(username: str, password: str, host: str, database: str):
 
 def load_dataframe_to_database(df_job: pd.DataFrame, table_name: str, engine: sqlalchemy.engine,
                                dtypes: Optional[dict] = None):
+    df_job = df_job.reset_index().rename({'index': 'date'})
+
     logger.info(f'Sending data {df_job.shape} to database table {table_name}...')
 
     sql_kwargs = {'name': table_name,
