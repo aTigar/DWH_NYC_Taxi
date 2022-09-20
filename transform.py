@@ -73,12 +73,14 @@ def agg_get_value_counts_as_columns(df_group, feature):
     for group in df_group.groups:
         sub_df = df_group.get_group(group)
         sub_df = sub_df[sub_df[feature].notna()]
+        sub_df[feature] = sub_df[feature].astype('int')
         sub_df = sub_df[feature].value_counts().reset_index()
-        sub_df['index'] = sub_df['index'].astype('int').astype('str')
-        sub_df = sub_df.swapaxes(0, 1)
-        sub_df.columns = list(sub_df.iloc[0])
-        sub_df = sub_df.drop('index')
-        sub_df.index = [group]
+        sub_df['count'] = sub_df[feature]
+        sub_df[feature] = sub_df['index']
+        # sub_df = sub_df.swapaxes(0, 1)
+        # sub_df.columns = list(sub_df.iloc[0])
+        # sub_df = sub_df.drop('index')
+        sub_df = sub_df.assign(index=group).set_index('index')
         ret_df = pd.concat([ret_df, sub_df], axis=0)
     return ret_df
 
