@@ -1,4 +1,8 @@
+import datetime
 import glob
+
+import pandas as pd
+
 import extract
 import load
 import transform
@@ -82,37 +86,53 @@ def prepare_weather_data():
     return df_final
 
 
+def prepare_calender_data(_t0: str, _t1: str) -> pd.DataFrame:
+    df = pd.DataFrame()
+    df['dateID'] = pd.date_range(start=_t0, end=_t1)
+    df['year'] = df['dateID'].apply(lambda x: x.year)
+    df['month'] = df['dateID'].apply(lambda x: x.month)
+    df['day'] = df['dateID'].apply(lambda x: x.day)
+    df['dayofweek'] = df['dateID'].dt.dayofweek
+    df['day_name'] = df['dateID'].dt.day_name()
+    return df
+
+
 if __name__ == '__main__':
     logger.info('Starting...')
 
     # init
-    # engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
-    #
-    # # covid data
-    # df = prepare_covid_data()
-    # df.to_csv('covid.csv')
-    # load.load_dataframe_to_database(df, 'covid', engine)
-    #
-    # # weather data
-    # df = prepare_weather_data()
-    # df.to_csv('weather.csv')
-    # load.load_dataframe_to_database(df, 'weather', engine)
+    engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
+
+    # covid data
+    df = prepare_covid_data()
+    df.to_csv('covid.csv')
+    load.load_dataframe_to_database(df, 'covid', engine)
+
+    # weather data
+    df = prepare_weather_data()
+    df.to_csv('weather.csv')
+    load.load_dataframe_to_database(df, 'weather', engine)
 
     # taxi data
-
     df_pickup, df_dropoff, df_dist = prepare_taxi_data()
 
     df_pickup.to_csv(f'df_pickup.csv')
     df_dropoff.to_csv(f'df_dropoff.csv')
     df_dist.to_csv(f'df_distances.csv')
 
-    # load.load_dataframe_to_database(df_pickup, f'taxi_pickup', engine)
-    # load.load_dataframe_to_database(df_dropoff, f'taxi_dropoff', engine)
-    # load.load_dataframe_to_database(df_date, f'taxi_distances', engine)
+    load.load_dataframe_to_database(df_pickup, f'taxi_pickup', engine)
+    load.load_dataframe_to_database(df_dropoff, f'taxi_dropoff', engine)
+    load.load_dataframe_to_database(df_dist, f'taxi_distances', engine)
 
-    # # taxi meta data
-    # df = pd.read_csv('data/taxi_zone_lookup_enhanced.csv')
-    # load.load_dataframe_to_database(df, 'taxi_lookup', engine)
+    # taxi meta data
+    df = pd.read_csv('data/taxi_zone_lookup_enhanced.csv')
+    load.load_dataframe_to_database(df, 'taxi_lookup', engine)
+
+    # calender data
+    t0 = '2018-01-01'
+    t1 = '2022-12-31'
+    df_calender = prepare_calender_data(t0, t1)
+    load.load_dataframe_to_database(df_calender, f'calender', engine)
 
     logger.success('Done!')
 
