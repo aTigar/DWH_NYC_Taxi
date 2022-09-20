@@ -56,6 +56,11 @@ def prepare_taxi_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         df_pickup_final = sort_features(df_pickup_final)
         df_dropoff_final = sort_features(df_dropoff_final)
 
+    # move index to column date
+    df_pickup_final = df_pickup_final.reset_index().rename(columns={'index': 'date'})
+    df_dropoff_final = df_dropoff_final.reset_index().rename(columns={'index': 'date'})
+    df_distance_final = df_distance_final.reset_index().rename(columns={'index': 'date'})
+
     return df_pickup_final, df_dropoff_final, df_distance_final
 
 
