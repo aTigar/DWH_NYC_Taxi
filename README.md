@@ -13,3 +13,33 @@
     runas /netonly /user:htwk\username "C:\Program Files\JetBrains\IntelliJ IDEA <version>\bin\idea64.exe"
     ```
 - Anschließend sollten keine Anmeldefehler entstehen über pyodbc
+
+## Daten
+
+### Struktur
+
+Die Quelldaten als .parquet und .csv Dateien haben folgendes Dateischema:
+
+```
+data/
+├─ taxi/
+│  ├─ fhv_xx_yyyy.parquet
+│  ├─ green_xx_yyyy.parquet
+│  ├─ yellow_xx_yyyy.parquet
+├─ covid/
+│  ├─ x.csv
+├─ weather/
+│  ├─ x.csv
+```
+### Quellen
+
+Die Daten können von folgenden Quellen bezogen werden:
+- https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+- https://www.weather.gov/okx/
+- 
+
+## Ausführen
+
+Der ETL Prozess kann mittels Ausführung der etl.py gestartet werden.
+
+
