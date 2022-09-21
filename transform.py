@@ -1,6 +1,7 @@
 from datetime import datetime, date, timedelta
 
 import numpy as np
+import pandas as pd
 
 from config import *
 
@@ -31,7 +32,6 @@ taxi_zone_lookup = taxi_zone_lookup[['LocationID', 'location']]
 taxi_zone_lookup = taxi_zone_lookup.set_index('LocationID').to_dict()['location']
 
 
-# Source: http://stackoverflow.com/a/29546836/2901002
 def haversine_np(lon1, lat1, lon2, lat2):
     """
     Calculate the great circle distance between two points
@@ -39,6 +39,7 @@ def haversine_np(lon1, lat1, lon2, lat2):
 
     All args must be of equal length.
 
+    Source: http://stackoverflow.com/a/29546836/2901002
     """
     lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
 
@@ -52,42 +53,79 @@ def haversine_np(lon1, lat1, lon2, lat2):
     return km
 
 
-def clean_taxi_data(df: pd.DataFrame, pickup: bool, dropoff: bool):
+def agg_resolve_dates(df_group, feature):
+    ret_df = pd.DataFrame()
+    for group in df_group.groups:
+        sub_df = pd.DataFrame(index=[group], data=[{'year': group.year, 'month': group.month, 'day': group.day}])
+        ret_df = pd.concat([ret_df, sub_df], axis=0)
+    return ret_df
+
+
+def agg_get_value_counts_as_columns(df_group, feature):
+    """
+    pivots the summary for each location as columns
+
+    :param df_group: the key for the groups
+    :param feature: the key of the feature to extract
+    :return: dataframe with grouped summaries' ad columns
+    """
+    ret_df = pd.DataFrame()
+    for group in df_group.groups:
+        sub_df = df_group.get_group(group)
+        sub_df = sub_df[sub_df[feature].notna()]
+        sub_df[feature] = sub_df[feature].astype('int')
+        sub_df = sub_df[feature].value_counts().reset_index()
+        sub_df['count'] = sub_df[feature]
+        sub_df[feature] = sub_df['index']
+        # sub_df = sub_df.swapaxes(0, 1)
+        # sub_df.columns = list(sub_df.iloc[0])
+        # sub_df = sub_df.drop('index')
+        sub_df = sub_df.assign(index=group).set_index('index')
+        ret_df = pd.concat([ret_df, sub_df], axis=0)
+    return ret_df
+
+
+def extract_features(df, group_key, feature_aggregations):
+    """
+    extracts features from df by aggregation
+    :param df:
+    :param group_key:
+    :param feature_aggregations:
+    :return:
+    """
+    df_new = pd.DataFrame()
+    df_group = df.groupby(group_key)
+    df_aggregated = pd.DataFrame()
+    logger.info(f'Extract features {list(feature_aggregations.keys())}...')
+    for feature in feature_aggregations:
+        if feature in list(df.columns):
+            aggregate = feature_aggregations[feature]
+            if isinstance(aggregate, str):
+                df_new = df_group[feature]
+                df_new = getattr(df_new, aggregate)()
+                df_new.columns = [feature]
+            elif callable(aggregate):
+                df_new = aggregate(df_group, feature)
+            else:
+                logger.error(f"Can't aggregate with {aggregate} ({type(aggregate)}).")
+
+            df_aggregated = pd.concat([df_aggregated, df_new], axis=1)
+        else:
+            logger.warning(f'{feature} not found.')
+
+    return df_aggregated
+
+
+def clean_taxi_data(df: pd.DataFrame, taxi_type: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     clean pd.DataFrame
     :return:
     """
-
-    def get_value_counts_as_columns(df_group, feature):
-        """
-        pivots the summary for each location as columns
-
-        :param df_group: the key for the groups
-        :param feature: the key of the feature to extract
-        :return: dataframe with grouped summaries' ad columns
-        """
-        ret_df = pd.DataFrame()
-        for group in df_group.groups:
-            sub_df = df_group.get_group(group)
-            sub_df = sub_df[sub_df[feature].notna()]
-            sub_df = sub_df[feature].value_counts().reset_index()
-            sub_df['index'] = sub_df['index'].astype('int').astype('str')
-            sub_df = sub_df.swapaxes(0, 1)
-            sub_df.columns = list(sub_df.iloc[0])
-            sub_df = sub_df.drop('index')
-            sub_df.index = [group]
-            ret_df = pd.concat([ret_df, sub_df], axis=0)
-        return ret_df
-
-    # transform and reduce timestamp to date
-    # if 'tpep_pickup_datetime' in list(df.columns):
+    # fix naming consensus
     df = df.rename(columns=column_mapper)
 
-    # if 'lpep_pickup_datetime' in list(df.columns):
-    #    df = df.rename(columns={'lpep_pickup_datetime': 'pickup_datetime', 'lpep_dropoff_datetime': 'dropoff_datetime'})
-
+    # transform and reduce timestamp to date
     logger.info('Cleaning datetime ...')
-    # df['date'] = df['pickup_datetime'].apply(lambda x: pd.to_datetime(x, unit='us').strftime('%Y-%m-%d'))
     df['date'] = pd.to_datetime(df['pickup_datetime'], unit='us').dt.date
 
     # get year and month from data appearance
@@ -105,15 +143,7 @@ def clean_taxi_data(df: pd.DataFrame, pickup: bool, dropoff: bool):
 
     logger.success('Datetime cleaned.')
 
-    meta_data = {
-        'trip_distance': 'mean'
-    }
-
-    if pickup:
-        meta_data.update({'PUlocationID': 'value_count'})
-    if dropoff:
-        meta_data.update({'DOlocationID': 'value_count'})
-
+    # calculate missing features
     if "trip_distance" not in list(df.columns):
         logger.info('trip_distance not available: calculating...')
 
@@ -133,39 +163,26 @@ def clean_taxi_data(df: pd.DataFrame, pickup: bool, dropoff: bool):
 
         logger.success('trip_distance calculated.')
 
-    df_group = df.groupby('date')
-    df_daily = pd.DataFrame()
-    logger.info('Extract features ...')
-    for feature in meta_data:
-        if feature in list(df.columns):
-            combine_type = meta_data[feature]
-            if combine_type == 'value_count':
-                df_new = get_value_counts_as_columns(df_group, feature)
-            else:
-                df_new = df_group[feature]
-                df_new = getattr(df_new, combine_type)()
-                df_new.columns = [feature]
-            df_daily = pd.concat([df_daily, df_new], axis=1)
-        else:
-            logger.warning(f'{feature} not found.')
+    # aggregation - reduce smallest timeunit to a day
+    feature_aggregations = {
+        'trip_distance': 'mean',
+        'PUlocationID': agg_get_value_counts_as_columns,
+        'DOlocationID': agg_get_value_counts_as_columns,
+    }
 
-    # sort features
-    cols = list(df_daily.columns)
-    c_ints = []
-    c_str = []
-    for c in cols:
-        try:
-            c_ints.append(int(c))
-        except:
-            c_str.append(c)
-    c_ints.sort()
-    c_str.extend([str(i) for i in c_ints])
+    df_pickups = extract_features(df, 'date',  {'PUlocationID': agg_get_value_counts_as_columns})
+    df_dropoffs = extract_features(df, 'date', {'DOlocationID': agg_get_value_counts_as_columns})
 
-    df_daily = df_daily[c_str]
+    df_distances = extract_features(df, 'date', {'trip_distance': 'mean'})
+
+    # set taxi_type
+    df_dropoffs = df_dropoffs.assign(taxi_type=taxi_type)
+    df_pickups = df_pickups.assign(taxi_type=taxi_type)
+    df_distances = df_distances.assign(taxi_type=taxi_type)
 
     logger.success('Features extracted.')
 
-    return df_daily
+    return df_pickups, df_dropoffs, df_distances
 
 
 def clean_covid_data(df: pd.DataFrame):
