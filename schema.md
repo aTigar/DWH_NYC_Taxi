@@ -1,5 +1,5 @@
 ```sql
-create table taxi_facts
+create table taxi_fact
 (
     [index]       INT,
     dateID        INT,
