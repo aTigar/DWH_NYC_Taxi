@@ -36,7 +36,7 @@ data/
 Die Daten können von folgenden Quellen bezogen werden:
 - https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 - https://www.weather.gov/okx/
-- 
+- https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3
 
 ## Ausführen
 
