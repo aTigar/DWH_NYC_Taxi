@@ -1,4 +1,4 @@
-```
+```sql
 create table taxi_facts
 (
     [index]       INT,
