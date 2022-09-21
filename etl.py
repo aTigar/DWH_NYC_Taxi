@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     # taxi meta data
     df = pd.read_csv('data/taxi_zone_lookup_enhanced.csv')
-    load.load_dataframe_to_database(df, 'taxi_lookup', engine)
+    load.load_dataframe_to_database(df, 'taxi_locations', engine)
 
     # calender data
     t0 = '2018-01-01'
