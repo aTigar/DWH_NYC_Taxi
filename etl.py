@@ -127,11 +127,11 @@ if __name__ == '__main__':
 
     load.load_dataframe_to_database(df_pickup, f'taxi_pickup', engine)
     load.load_dataframe_to_database(df_dropoff, f'taxi_dropoff', engine)
-    load.load_dataframe_to_database(df_dist, f'taxi_distances', engine)
+    load.load_dataframe_to_database(df_dist, f'taxi_distance', engine)
 
     # taxi meta data
     df = pd.read_csv('data/taxi_zone_lookup_enhanced.csv')
-    load.load_dataframe_to_database(df, 'taxi_lookup', engine)
+    load.load_dataframe_to_database(df, 'taxi_location', engine)
 
     # calender data
     t0 = '2018-01-01'
