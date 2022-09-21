@@ -91,11 +91,11 @@ def prepare_calender_data(_t0: str, _t1: str) -> pd.DataFrame:
     df = pd.DataFrame()
     df['date'] = pd.date_range(start=_t0, end=_t1)
     df['dateID'] = df['date'].apply(pd.Timestamp.toordinal).astype(int)
-    df['year'] = df['dateID'].apply(lambda x: x.year)
-    df['month'] = df['dateID'].apply(lambda x: x.month)
-    df['day'] = df['dateID'].apply(lambda x: x.day)
-    df['dayofweek'] = df['dateID'].dt.dayofweek
-    df['day_name'] = df['dateID'].dt.day_name()
+    df['year'] = df['date'].apply(lambda x: x.year)
+    df['month'] = df['date'].apply(lambda x: x.month)
+    df['day'] = df['date'].apply(lambda x: x.day)
+    df['dayofweek'] = df['date'].dt.dayofweek
+    df['day_name'] = df['date'].dt.day_name()
     return df
 
 
@@ -134,7 +134,8 @@ if __name__ == '__main__':
     t0 = '2018-01-01'
     t1 = '2022-12-31'
     df_calender = prepare_calender_data(t0, t1)
-    load.load_dataframe_to_database(df_calender, f'calender', engine)
+    df_calender.to_csv('calendar.csv')
+    # load.load_dataframe_to_database(df_calender, f'calender', engine)
 
     logger.success('Done!')
 
