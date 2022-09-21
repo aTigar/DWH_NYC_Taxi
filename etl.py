@@ -64,6 +64,9 @@ def prepare_covid_data():
     df_clean = transform.clean_covid_data(df_raw)
     df_final = pd.concat([df_final, df_clean])
 
+    df_final = df_final.reset_index().rename(columns={'index': 'CID'})
+    df_final['dateID'] = df_final['date_of_interest'].apply(pd.Timestamp.toordinal).astype(int)
+
     return df_final
 
 
@@ -77,6 +80,9 @@ def prepare_weather_data():
         df_raw = extract.load_csv_data(file)
         df_clean = transform.clean_weather_data(df_raw)
         df_final = pd.concat([df_final, df_clean])
+
+    df_final = df_final.reset_index().rename(columns={'index': 'WID'})
+    df_final['dateID'] = df_final['DATE'].apply(pd.Timestamp.toordinal).astype(int)
 
     return df_final
 
@@ -97,22 +103,24 @@ if __name__ == '__main__':
     logger.info('Starting...')
 
     # init
-    # engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
+    engine, ins = load.connect_sqlalchemy(USER, PASSWORD, SERVER, DATABASE)
 
     # covid data
-    #df = prepare_covid_data()
-    #df.to_csv('covid.csv')
-    # load.load_dataframe_to_database(df, 'covid', engine)
+    df_covid = prepare_covid_data()
+    df_covid.to_csv('covid.csv')
+    load.load_dataframe_to_database(df_covid, 'covid', engine)
 
     # weather data
-    #df = prepare_weather_data()
-    #df.to_csv('weather.csv')
-    # load.load_dataframe_to_database(df, 'weather', engine)
+    df_weather = prepare_weather_data()
+    df_weather.to_csv('weather.csv')
+    load.load_dataframe_to_database(df_weather, 'weather', engine)
 
     # taxi data
-    df = prepare_taxi_data()
+    df_facts = prepare_taxi_data()
+    df_facts = df_facts.merge(df_weather[['WID', 'dateID']])
+    df_facts = df_facts.merge(df_covid[['CID', 'dateID']])
 
-    df.to_csv(f'df_taxi_facts.csv')
+    df_facts.to_csv(f'df_taxi_facts.csv')
 
     # load.load_dataframe_to_database(df_pickup, f'taxi_pickup', engine)
     # load.load_dataframe_to_database(df_dropoff, f'taxi_dropoff', engine)
@@ -120,13 +128,13 @@ if __name__ == '__main__':
 
     # taxi meta data
     df = pd.read_csv('data/taxi_zone_lookup_enhanced.csv')
-    # load.load_dataframe_to_database(df, 'taxi_lookup', engine)
+    load.load_dataframe_to_database(df, 'taxi_lookup', engine)
 
     # calender data
     t0 = '2018-01-01'
     t1 = '2022-12-31'
     df_calender = prepare_calender_data(t0, t1)
-    # load.load_dataframe_to_database(df_calender, f'calender', engine)
+    load.load_dataframe_to_database(df_calender, f'calender', engine)
 
     logger.success('Done!')
 
