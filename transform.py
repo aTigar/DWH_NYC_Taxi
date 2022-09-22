@@ -141,6 +141,10 @@ def clean_taxi_data(df: pd.DataFrame, taxi_type: str) -> tuple[pd.DataFrame, pd.
     # remove data rows with time outliers
     df = df[df['date'].between(start_date, end_date)].copy()
 
+    # extract date ID from date object
+    df['date'] = df['date'].apply(pd.Timestamp.toordinal).astype(int)
+    df = df.rename(columns={'date': 'dateID'})
+
     logger.success('Datetime cleaned.')
 
     # calculate missing features
@@ -170,19 +174,29 @@ def clean_taxi_data(df: pd.DataFrame, taxi_type: str) -> tuple[pd.DataFrame, pd.
         'DOlocationID': agg_get_value_counts_as_columns,
     }
 
-    df_pickups = extract_features(df, 'date',  {'PUlocationID': agg_get_value_counts_as_columns})
-    df_dropoffs = extract_features(df, 'date', {'DOlocationID': agg_get_value_counts_as_columns})
+    df_pickups = extract_features(df, 'dateID',  {'PUlocationID': agg_get_value_counts_as_columns}).rename(columns={'count': 'pickups', 'PUlocationID': 'locationID'})
+    df_dropoffs = extract_features(df, 'dateID', {'DOlocationID': agg_get_value_counts_as_columns}).rename(columns={'count': 'dropoffs', 'DOlocationID': 'locationID'})
+    df_distances = extract_features(df, 'dateID', {'trip_distance': 'mean'}).reset_index()
 
-    df_distances = extract_features(df, 'date', {'trip_distance': 'mean'})
+    df_pickups = df_pickups.reset_index().set_index(['index', 'locationID'])
+    df_dropoffs = df_dropoffs.reset_index().set_index(['index', 'locationID'])
+
+    df_facts = pd.concat([df_pickups, df_dropoffs], axis=1).reset_index()
+
+    df_facts = df_facts.merge(df_distances).rename(columns={'index': 'dateID'})
 
     # set taxi_type
-    df_dropoffs = df_dropoffs.assign(taxi_type=taxi_type)
-    df_pickups = df_pickups.assign(taxi_type=taxi_type)
-    df_distances = df_distances.assign(taxi_type=taxi_type)
+    df_facts = df_facts.assign(taxiTypeID=taxi_type)
+
+    # fill missing values
+    df_facts = df_facts.fillna(value={'pickups': 0, 'dropoffs': 0})
+
+    # set dtypes
+    df_facts = df_facts.astype({'dateID': 'int32', 'locationID': 'int32', 'pickups': 'int32', 'dropoffs': 'int32', 'trip_distance': 'float'})
 
     logger.success('Features extracted.')
 
-    return df_pickups, df_dropoffs, df_distances
+    return df_facts
 
 
 def clean_covid_data(df: pd.DataFrame):
