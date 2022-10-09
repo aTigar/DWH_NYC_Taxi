@@ -21,3 +21,7 @@ def gen_cube(data, feature, agg_method):
         df = df[[df.columns[0]]]
         df.columns = [feature]
     return df
+
+def weather_date_index(df):
+
+    return df
